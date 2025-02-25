@@ -30,6 +30,15 @@ fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(12,6))
 s = sns.boxplot(ax = ax1, x="Class", y="Amount", hue="Class",data=sriram, palette="PRGn",showfliers=True)
 s = sns.boxplot(ax = ax2, x="Class", y="Amount", hue="Class",data=sriram, palette="PRGn",showfliers=False)
 plt.show();
+cm = pd.crosstab(valid_df[target].values, preds, rownames=['Actual'], colnames=['Predicted'])
+fig, (ax1) = plt.subplots(ncols=1, figsize=(5,5))
+sns.heatmap(cm, 
+            xticklabels=['Not Fraud', 'Fraud'],
+            yticklabels=['Not Fraud', 'Fraud'],
+            annot=True,ax=ax1,
+            linewidths=.2,linecolor="Darkblue", cmap="Blues")
+plt.title('Confusion Matrix', fontsize=14)
+plt.show()
 fraud = sriram.loc[sriram['Class'] == 1]
 
 trace = go.Scatter(
