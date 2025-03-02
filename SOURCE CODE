@@ -1,5 +1,7 @@
 import numpy as np   # linear algebra
+
 import pandas as pd  # data processing
+
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
@@ -33,6 +35,7 @@ plt.show()
 sns.barplot(x=sriram['OCCUPATION_TYPE'], y=sriram['TARGET'])
 plt.xticks(rotation='vertical')
 plt.show()
+
 sriram = sriram[['TARGET', 'NAME_CONTRACT_TYPE', 'CODE_GENDER', 'FLAG_OWN_CAR', 'AMT_INCOME_TOTAL', 
              'AMT_CREDIT', 'AMT_ANNUITY', 'AMT_GOODS_PRICE', 'NAME_EDUCATION_TYPE', 'OCCUPATION_TYPE', 'CNT_FAM_MEMBERS', 
              'REGION_RATING_CLIENT', 'REG_REGION_NOT_WORK_REGION', 'DAYS_LAST_PHONE_CHANGE']]  # Choosing the important set of features for further analysis and training
@@ -48,23 +51,28 @@ sriram.info()
 numerical_features = sriram.select_dtypes(include=["int64", "float64"]).columns.difference(["TARGET"])
 categorical_features = sriram.select_dtypes(include=["object"]).columns
 print(f"Numerical features in data: {numerical_features}, \nCategorical features in data: {categorical_features}")
+
 categorical_columns = ['NAME_CONTRACT_TYPE', 'CODE_GENDER', 'FLAG_OWN_CAR', 'NAME_EDUCATION_TYPE', 'OCCUPATION_TYPE'] # Preprocessing: Encode categorical features 
 sriram_encoded = pd.get_dummies(sriram, columns=categorical_columns, drop_first=True) 
+
 X = sriram_encoded.drop('TARGET', axis=1)  # Target variable and features
 y = sriram_encoded['TARGET']
 smote = SMOTE(random_state=42)  # Handle class imbalance with SMOTE
 X_resampled, y_resampled = smote.fit_resample(X, y)  # Split the dataset
 X_train, X_test, y_train, y_test = train_test_split(X_resampled, y_resampled, test_size=0.2, random_state=42, stratify=y_resampled)
+
 scaler = StandardScaler()   # Scale the data for KNN
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
-*models = {   # Initialize models
+
+*models = {    # Initialize models
     "Logistic Regression": LogisticRegression(class_weight='balanced', random_state=42),
     "Random Forest": RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42, class_weight='balanced'),
     "Decision Tree": DecisionTreeClassifier(max_depth=10, random_state=42, class_weight='balanced'),
     "KNN": KNeighborsClassifier(n_neighbors=5)
 }
-for name, model in models.items():   # Train, predict, and visualize for each model
+
+for name, model in models.items():     # Train, predict, and visualize for each model
     print(f"\n{name}\n{'-' * len(name)}")
     if name in ["Logistic Regression", "Decision Tree", "Random Forest"]:
         model.fit(X_train, y_train)
@@ -74,8 +82,10 @@ for name, model in models.items():   # Train, predict, and visualize for each mo
         model.fit(X_train_scaled, y_train)
         y_pred = model.predict(X_test_scaled)
         y_prob = model.predict_proba(X_test_scaled)[:, 1]
-print(classification_report(y_test, y_pred))   # Classification report
-ConfusionMatrixDisplay.from_estimator(model, X_test_scaled if name in ["SVM", "KNN"] else X_test, y_test)  # Confusion matrix
+
+print(classification_report(y_test, y_pred))     # Classification report
+
+ConfusionMatrixDisplay.from_estimator(model, X_test_scaled if name in ["SVM", "KNN"] else X_test, y_test)    # Confusion matrix
     plt.title(f'Confusion Matrix - {name}')
     plt.show()
     
